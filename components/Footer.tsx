@@ -5,16 +5,16 @@ import { FaFacebook, FaLinkedin, FaTwitter } from "react-icons/fa";
 
 const footerData = {
   DocsConvert: [
-    { name: "Home", href: "#" },
-    { name: "Features", href: "#" },
-    { name: "Pricing", href: "#" },
-    { name: "About", href: "#" },
-    { name: "Contact", href: "#" },
+    { name: "Home", href: "/" },
+    { name: "Features", href: "/features" },
+    { name: "Pricing", href: "/pricing" },
+    { name: "About", href: "/about" },
+    { name: "Contact", href: "/contact" },
   ],
   Resources: [
-    { name: "Blog", href: "#" },
-    { name: "Support", href: "#" },
-    { name: "FAQ", href: "#" },
+    { name: "Blog", href: "/resources/blog" },
+    { name: "Support", href: "/resources/support" },
+    { name: "FAQ", href: "/resources/faq" },
   ],
   Legal: [
     { name: "Terms of Service", href: "/legal/tos" },
@@ -23,8 +23,16 @@ const footerData = {
   ],
   "Follow Us": [
     { name: "Twitter", href: "#", icon: <FaTwitter className="h-5 w-5" /> },
-    { name: "Facebook", href: "#", icon: <FaFacebook className="h-5 w-5" /> },
-    { name: "LinkedIn", href: "#", icon: <FaLinkedin className="h-5 w-5" /> },
+    {
+      name: "Facebook",
+      href: "https://www.facebook.com/DocsConvert/",
+      icon: <FaFacebook className="h-5 w-5" />,
+    },
+    {
+      name: "LinkedIn",
+      href: "https://www.linkedin.com/company/docsconvert",
+      icon: <FaLinkedin className="h-5 w-5" />,
+    },
   ],
 };
 

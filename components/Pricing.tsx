@@ -13,7 +13,7 @@ const plans: PricingPlan[] = [
     period: "per month",
     features: [
       "10 page conversions",
-      "HTML, HTM, and XML formats",
+      "HTML, HTL, and XML formats",
       "Customizable outputs",
       "Preview conversion",
     ],
@@ -26,7 +26,7 @@ const plans: PricingPlan[] = [
     period: "per month",
     features: [
       "Unlimited page conversions",
-      "HTML, HTM, and XML formats",
+      "HTML, HTL, and XML formats",
       "Customizable outputs",
       "Preview conversion",
       "Usage tracking",

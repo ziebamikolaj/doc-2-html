@@ -21,11 +21,14 @@ export const Header = () => (
         ))}
       </nav>
       <div className="flex items-center gap-2">
-        <Link href="/login" className="text-sm font-medium hover:underline">
+        <Link
+          href="/auth/login"
+          className="text-sm font-medium hover:underline"
+        >
           Login
         </Link>
         <Link
-          href="/sign-up"
+          href="/auth/sign-up"
           className="pl-4 text-sm font-medium hover:underline"
         >
           Sign Up

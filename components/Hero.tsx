@@ -14,11 +14,13 @@ export const Hero = () => (
             Convert your documents with ease
           </h1>
           <p className="text-lg">
-            Our subscription-based document conversion service makes it simple
-            to convert your files to HTML, HTL, and XML formats.
+            Our document conversion service makes it simple to convert your
+            files to HTML, HTL, and XML formats.
           </p>
           <div className="flex flex-col gap-2 sm:flex-row">
-            <Button>Get Started</Button>
+            <Button className="bg-slate-400 text-black hover:bg-slate-300 hover:text-black">
+              Get Started
+            </Button>
             <Link
               href="#"
               className="inline-flex items-center gap-2 text-sm font-medium hover:underline"
@@ -28,7 +30,7 @@ export const Hero = () => (
             </Link>
           </div>
         </div>
-        <div>
+        <div className="hidden md:block">
           <Image
             src="/placeholder.svg"
             width={600}

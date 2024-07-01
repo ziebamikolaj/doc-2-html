@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 import "./globals.css";
 
+import type { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 
 import { Footer } from "@/components/Footer";
@@ -24,6 +25,12 @@ const fontBody = Inter({
   display: "swap",
   variable: "--font-body",
 });
+
+export const metadata: Metadata = {
+  title: "DocsConvert - Convert your documents with ease",
+  description:
+    "Our subscription-based document conversion service makes it simple to convert your files to HTML, HTL, and XML formats.",
+};
 
 interface LayoutProps {
   readonly children: React.ReactNode;

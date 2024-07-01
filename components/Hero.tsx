@@ -6,7 +6,7 @@ import { FaChevronRight } from "react-icons/fa";
 import { Button } from "@/components/ui/button";
 
 export const Hero = () => (
-  <section className="bg-gradient-to-r from-primary to-primary-foreground py-20 text-primary-foreground">
+  <section className="bg-gradient-to-r from-primary to-slate-800 py-20 text-primary-foreground">
     <div className="container mx-auto max-w-6xl px-4 md:px-6">
       <div className="grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="space-y-4">

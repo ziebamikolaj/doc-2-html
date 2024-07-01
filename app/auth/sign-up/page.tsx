@@ -17,8 +17,14 @@ import { Input } from "@/components/ui/input";
 const formSchema = z
   .object({
     email: z.string().email(),
-    password: z.string().min(6).max(50),
-    confirmPassword: z.string().min(6).max(50),
+    password: z
+      .string()
+      .min(6, { message: "Password has to have at least 6 characters" })
+      .max(50, { message: "Password cannot exceed 50 characters" }),
+    confirmPassword: z
+      .string()
+      .min(6, { message: "Password has to have at least 6 characters" })
+      .max(50, { message: "Password cannot exceed 50 characters" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -35,7 +41,7 @@ const SignUp = () => {
     },
   });
 
-  const onSubmit = (data: { email: string; password: string }) => {
+  const onSubmit = (data: z.infer<typeof formSchema>) => {
     console.log(data);
   };
 

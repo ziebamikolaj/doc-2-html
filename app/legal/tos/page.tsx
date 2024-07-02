@@ -10,7 +10,7 @@ import {
 const TermsOfService = () => {
   return (
     <div className="flex flex-col place-items-center bg-background text-foreground">
-      <main className="my-8 w-1/2 flex-1 space-y-5">
+      <main className="my-8 flex-1 space-y-5 px-8 lg:w-1/2">
         <TypographyH1 className="mb-8">Terms of Service</TypographyH1>
 
         <TypographyH2 className="mb-4">Introduction</TypographyH2>

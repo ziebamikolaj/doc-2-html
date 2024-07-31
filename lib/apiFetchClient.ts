@@ -23,5 +23,5 @@ export const apiFetchClient = async (
     throw new Error(errorData.message || "Failed to fetch data");
   }
 
-  return res;
+  return res.json();
 };

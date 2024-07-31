@@ -75,10 +75,6 @@ const Plan = ({ name, price, period, features, buttonText }: PlanProps) => (
   </Card>
 );
 
-interface PricingProps {
-  plans: PricingPlan[];
-}
-
 export const Pricing = () => (
   <section className="py-20">
     <div className="container mx-auto max-w-6xl px-4 md:px-6">

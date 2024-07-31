@@ -1,3 +1,7 @@
+"use client";
+
+import type { UserInfo } from "@/types/userInfo";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { FaRegUser } from "react-icons/fa";
 
@@ -5,7 +9,13 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 
+import NotFound from "../not-found";
+
 const Home = () => {
+  const { data: userInfo } = useQuery<UserInfo>({
+    queryKey: ["isLoggedIn"],
+  });
+  if (!userInfo) return NotFound;
   return (
     <div className="flex min-h-[calc(100vh-236px-65px)] items-start justify-center bg-gradient-to-b from-background to-background/80 p-8">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
@@ -32,14 +42,16 @@ const Home = () => {
             <FaRegUser />
           </Avatar>
           <div>
-            <p className="text-sm text-muted-foreground">john@example.com</p>
+            <p className="text-sm text-muted-foreground">{userInfo.email}</p>
           </div>
         </div>
         <Separator />
         <div className="grid gap-2">
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Subscription</p>
-            <p className="text-sm text-muted-foreground">Pro</p>
+            <p className="text-sm text-muted-foreground">
+              {userInfo.subscriptionTier}
+            </p>
           </div>
           <div className="flex items-center justify-between">
             <p className="text-sm font-medium">Conversion Limit</p>
@@ -48,6 +60,7 @@ const Home = () => {
         </div>
         <Separator />
         <div className="grid gap-2">
+          {/* TO DO */}
           <Link href="#" className="text-sm hover:underline" prefetch={false}>
             Change Email
           </Link>

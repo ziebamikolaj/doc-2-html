@@ -1,5 +1,6 @@
 "use client";
 
+import type { UserInfo } from "@/types/userInfo";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import Image from "next/image";
@@ -8,27 +9,36 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { apiFetchClient } from "@/lib/apiFetchClient";
+import { userInfo } from "@/types/userInfo";
 
-const checkIsLogged = async () => {
-  try {
-    const res = await apiFetchClient("/users/me");
-    return res.ok;
-  } catch (error) {
-    return false;
+const getUserInfo = async () => {
+  const res = await apiFetchClient("/users/me");
+
+  const validateResponse = userInfo.safeParse(res);
+
+  if (!validateResponse.success) {
+    throw new Error("Invalid response");
   }
+
+  const data = validateResponse.data;
+  return data;
 };
+
 export const Header = () => {
   const router = useRouter();
   const queryClient = useQueryClient();
-  const { data: isLoggedIn } = useQuery<boolean>({
-    queryFn: checkIsLogged,
+
+  const { data: userInfo } = useQuery<UserInfo>({
+    queryFn: getUserInfo,
     queryKey: ["isLoggedIn"],
   });
+
   const handleLogout = async () => {
     Cookies.remove("Authorization");
     queryClient.setQueryData(["isLoggedIn"], false);
     router.push("/");
   };
+
   return (
     <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur-sm">
       <div className="container mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-6">
@@ -47,7 +57,7 @@ export const Header = () => {
             </Link>
           ))}
         </nav>
-        {isLoggedIn ? (
+        {userInfo ? (
           <div className="flex items-center gap-4">
             <Link href="/home" className="text-sm font-medium hover:underline">
               Home

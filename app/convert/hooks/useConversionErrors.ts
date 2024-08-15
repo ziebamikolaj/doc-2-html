@@ -1,5 +1,6 @@
 "use client";
 
+import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
 import { useState } from "react";
 
 export const useConversionErrors = () => {
@@ -7,10 +8,12 @@ export const useConversionErrors = () => {
     ignoreTags: string[];
     tagConversions: Array<string | null>;
     attributeRules: Array<string | null>;
+    conditions: Array<string | null>;
   }>({
     ignoreTags: [],
     tagConversions: [],
     attributeRules: [],
+    conditions: [],
   });
 
   const validateIgnoreTag = (tag: string): string => {
@@ -25,19 +28,37 @@ export const useConversionErrors = () => {
 
   const validateAttributeRule = (
     tag: string,
-    fromAttribute: string,
-    fromValue: string,
-    toAttribute: string,
-    toValue: string,
+    attribute: string,
+    value: string,
   ): string => {
     if (tag.trim() === "") {
       return "Tag must be specified";
     }
-    if (fromAttribute.trim() === "" && fromValue.trim() === "") {
-      return "Either 'From Attribute' or 'From Value' must be specified";
+    if (attribute.trim() === "" || value.trim() === "") {
+      return "'Attribute' and 'Value' must be specified";
     }
-    if (toAttribute.trim() === "" && toValue.trim() === "") {
-      return "Either 'To Attribute' or 'To Value' must be specified";
+    return "";
+  };
+
+  const validateCondition = (condition: Condition): string => {
+    if (condition.property.trim() === "") {
+      return "Property must be specified";
+    }
+    if (condition.operator.trim() === "") {
+      return "Operator must be specified";
+    }
+    if (condition.value.trim() === "") {
+      return "Value must be specified";
+    }
+    return "";
+  };
+
+  const validateRule = (rule: Rule): string => {
+    if (!rule.conditions || rule.conditions.length === 0) {
+      return "At least one condition must be specified";
+    }
+    if (rule.conditions.length > 1 && !rule.logic) {
+      return "Logic (AND/OR) must be specified for multiple conditions";
     }
     return "";
   };
@@ -54,21 +75,17 @@ export const useConversionErrors = () => {
       );
     } else if (field === "attributeRules") {
       newErrors.attributeRules = value.map(
-        (rule: {
-          tag: string;
-          fromAttribute: string;
-          fromValue: string;
-          toAttribute: string;
-          toValue: string;
-        }) =>
-          validateAttributeRule(
-            rule.tag,
-            rule.fromAttribute,
-            rule.fromValue,
-            rule.toAttribute,
-            rule.toValue,
-          ),
+        (rule: { tag: string; attribute: string; value: string }) =>
+          validateAttributeRule(rule.tag, rule.attribute, rule.value),
       );
+    } else if (field === "conditions") {
+      newErrors.conditions = value.map((rule: Rule) => {
+        const ruleError = validateRule(rule);
+        if (ruleError) return ruleError;
+        return (
+          rule.conditions.map(validateCondition).filter(Boolean)[0] || null
+        );
+      });
     }
 
     setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));

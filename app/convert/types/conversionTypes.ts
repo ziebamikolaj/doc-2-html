@@ -67,9 +67,7 @@ export interface TagConversion {
 
 export interface AttributeRule {
   tag: string;
-  fromAttribute: string;
-  fromValue: string;
-  toAttribute: string;
-  toValue: string;
+  attribute: string;
+  value: string;
   rule: Rule;
 }

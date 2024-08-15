@@ -1,6 +1,6 @@
 import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
-import React, { useCallback } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import React, { useCallback, useState } from "react";
+import { ChevronDown, ChevronRight, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,22 +18,19 @@ interface ConditionBuilderProps {
 }
 
 const ConditionBuilder = ({ rule, setRule }: ConditionBuilderProps) => {
-  const addCondition = useCallback(
-    (operator: string) => {
-      setRule({
-        ...rule,
-        conditions: [
-          ...(rule.conditions || []),
-          {
-            property: "",
-            operator: operator.toLowerCase().replace(" ", ""),
-            value: "",
-          },
-        ],
-      } as Rule);
-    },
-    [rule, setRule],
-  );
+  const [expandedConditions, setExpandedConditions] = useState<number[]>([]);
+
+  const addCondition = useCallback(() => {
+    const newConditionIndex = rule.conditions.length;
+    setRule({
+      ...rule,
+      conditions: [
+        ...(rule.conditions || []),
+        { property: "", operator: "contains", value: "" },
+      ],
+    } as Rule);
+    setExpandedConditions([newConditionIndex]);
+  }, [rule, setRule]);
 
   const updateCondition = useCallback(
     (index: number, field: keyof Condition, value: string) => {
@@ -53,18 +50,27 @@ const ConditionBuilder = ({ rule, setRule }: ConditionBuilderProps) => {
         ...rule,
         conditions: rule.conditions.filter((_, i) => i !== index),
       });
+      setExpandedConditions(expandedConditions.filter((i) => i !== index));
     },
-    [rule, setRule],
+    [rule, setRule, expandedConditions],
   );
 
   const updateLogic = useCallback(
     (logic: "AND" | "OR") => {
-      setRule({
-        ...rule,
-        logic,
-      });
+      setRule({ ...rule, logic });
     },
     [rule, setRule],
+  );
+
+  const toggleCondition = useCallback(
+    (index: number) => {
+      setExpandedConditions(
+        expandedConditions.includes(index)
+          ? expandedConditions.filter((i) => i !== index)
+          : [...expandedConditions, index],
+      );
+    },
+    [expandedConditions],
   );
 
   const operators = [
@@ -72,15 +78,27 @@ const ConditionBuilder = ({ rule, setRule }: ConditionBuilderProps) => {
     "Starts with",
     "Ends with",
     "Equals",
-    "Matches (regex)",
+    "Matches",
+    "Does not contain",
+    "Does not start with",
+    "Does not end with",
+    "Does not equal",
+    "Does not match",
+    "Regex (syntax //gm)",
   ];
+
+  const getConditionSummary = (condition: Condition) => {
+    if (!condition.property || !condition.operator || !condition.value) {
+      return "Not set";
+    }
+    return `${condition.property} ${condition.operator} ${condition.value}`.trim();
+  };
 
   return (
     <div className="space-y-4">
-      <h4 className="font-medium">Conditions</h4>
-      {rule.conditions && rule.conditions.length > 0 && (
+      {rule.conditions && rule.conditions.length > 1 && (
         <Select onValueChange={updateLogic} value={rule.logic}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Select logic" />
           </SelectTrigger>
           <SelectContent>
@@ -91,62 +109,87 @@ const ConditionBuilder = ({ rule, setRule }: ConditionBuilderProps) => {
       )}
       {rule.conditions &&
         rule.conditions.map((condition, index) => (
-          <div key={index} className="space-y-2">
-            <div className="flex flex-wrap gap-2">
-              {operators.map((op) => (
+          <div key={index} className="rounded-md border p-2">
+            <div className="flex items-center justify-between">
+              <div
+                className="flex-grow cursor-pointer font-medium"
+                onClick={() => toggleCondition(index)}
+              >
+                Condition {index + 1}: {getConditionSummary(condition)}
+              </div>
+              <div className="flex items-center space-x-2">
                 <Button
-                  key={op}
-                  variant={
-                    condition.operator === op.toLowerCase().replace(" ", "")
-                      ? "default"
-                      : "outline"
-                  }
+                  variant="ghost"
                   size="sm"
-                  onClick={() =>
-                    updateCondition(
-                      index,
-                      "operator",
-                      op.toLowerCase().replace(" ", ""),
-                    )
+                  onClick={() => toggleCondition(index)}
+                >
+                  {expandedConditions.includes(index) ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => deleteCondition(index)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {expandedConditions.includes(index) && (
+              <div className="mt-2 space-y-2">
+                <Input
+                  value={condition.property}
+                  onChange={(e) =>
+                    updateCondition(index, "property", e.target.value)
+                  }
+                  placeholder="Property"
+                  className="w-full"
+                />
+                <Select
+                  value={condition.operator}
+                  onValueChange={(value) =>
+                    updateCondition(index, "operator", value)
                   }
                 >
-                  {op}
-                </Button>
-              ))}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Input
-                value={condition.property}
-                onChange={(e) =>
-                  updateCondition(index, "property", e.target.value)
-                }
-                placeholder="Property"
-              />
-              <Input
-                value={condition.value}
-                onChange={(e) =>
-                  updateCondition(index, "value", e.target.value)
-                }
-                placeholder="Value"
-              />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => deleteCondition(index)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select operator" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {operators.map((op) => (
+                      <SelectItem
+                        key={op}
+                        value={op.toLowerCase().replace(/ /g, "")}
+                      >
+                        {op}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Input
+                  value={condition.value}
+                  onChange={(e) =>
+                    updateCondition(index, "value", e.target.value)
+                  }
+                  placeholder="Value"
+                  className="w-full"
+                />
+              </div>
+            )}
           </div>
         ))}
-      <Button
-        onClick={() => addCondition("contains")}
-        variant="outline"
-        size="sm"
-        className="w-full"
-      >
-        <Plus className="mr-2 h-4 w-4" /> Add Condition
-      </Button>
+      <div className="grid w-full place-items-end">
+        <Button
+          onClick={addCondition}
+          variant="outline"
+          size="sm"
+          className="w-1/3"
+        >
+          <Plus className="mr-2 h-4 w-4" /> Add Condition
+        </Button>
+      </div>
     </div>
   );
 };

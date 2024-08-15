@@ -2,8 +2,8 @@ import type {
   TagConversion,
   TagConversionsSectionProps,
 } from "@/app/convert/types/conversionTypes";
-import React from "react";
-import { Info, Plus, X } from "lucide-react";
+import React, { useState } from "react";
+import { ChevronDown, ChevronRight, Info, Plus, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,10 @@ const TagConversionsSection = ({
   errors,
   validateAndSetErrors,
 }: TagConversionsSectionProps) => {
+  const [expandedConversions, setExpandedConversions] = useState<number[]>([]);
+
   const addTagConversion = () => {
+    const newIndex = tagConversions.length;
     const newTagConversions = [
       ...tagConversions,
       {
@@ -36,12 +39,14 @@ const TagConversionsSection = ({
     ];
     setTagConversions(newTagConversions);
     validateAndSetErrors("tagConversions", newTagConversions);
+    setExpandedConversions([newIndex]);
   };
 
   const removeTagConversion = (index: number) => {
     const newTagConversions = tagConversions.filter((_, i) => i !== index);
     setTagConversions(newTagConversions);
     validateAndSetErrors("tagConversions", newTagConversions);
+    setExpandedConversions(expandedConversions.filter((i) => i !== index));
   };
 
   const updateTagConversion = (
@@ -54,6 +59,21 @@ const TagConversionsSection = ({
     );
     setTagConversions(newTagConversions);
     validateAndSetErrors("tagConversions", newTagConversions);
+  };
+
+  const toggleConversion = (index: number) => {
+    setExpandedConversions(
+      expandedConversions.includes(index)
+        ? expandedConversions.filter((i) => i !== index)
+        : [...expandedConversions, index],
+    );
+  };
+
+  const getConversionSummary = (conversion: TagConversion) => {
+    if (!conversion.from || !conversion.to) {
+      return "Not set";
+    }
+    return `${conversion.from} → ${conversion.to}`;
   };
 
   return (
@@ -72,39 +92,63 @@ const TagConversionsSection = ({
         </TooltipProvider>
       </h3>
       {tagConversions.map((conversion, index) => (
-        <div
-          key={index}
-          className="space-y-2 rounded border bg-secondary/20 p-4"
-        >
-          <div className="flex items-center space-x-2">
-            <Input
-              value={conversion.from}
-              onChange={(e) =>
-                updateTagConversion(index, "from", e.target.value)
-              }
-              placeholder="From tag"
-            />
-            <Input
-              value={conversion.to}
-              onChange={(e) => updateTagConversion(index, "to", e.target.value)}
-              placeholder="To tag"
-            />
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => removeTagConversion(index)}
+        <div key={index} className="rounded border bg-secondary/20 p-4">
+          <div className="flex items-center justify-between">
+            <div
+              className="flex-grow cursor-pointer font-medium"
+              onClick={() => toggleConversion(index)}
             >
-              <X className="size-4" />
-            </Button>
+              Conversion {index + 1}: {getConversionSummary(conversion)}
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => toggleConversion(index)}
+              >
+                {expandedConversions.includes(index) ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeTagConversion(index)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
-          <ConditionBuilder
-            rule={conversion.rule || { conditions: [], logic: "AND" }}
-            setRule={(newRule) => {
-              updateTagConversion(index, "rule", newRule);
-            }}
-          />
-          {errors[index] && (
-            <p className="text-sm text-red-500">{errors[index]}</p>
+          {expandedConversions.includes(index) && (
+            <div className="mt-2 space-y-2">
+              <div className="flex items-center space-x-2">
+                <Input
+                  value={conversion.from}
+                  onChange={(e) =>
+                    updateTagConversion(index, "from", e.target.value)
+                  }
+                  placeholder="From tag"
+                />
+                <Input
+                  value={conversion.to}
+                  onChange={(e) =>
+                    updateTagConversion(index, "to", e.target.value)
+                  }
+                  placeholder="To tag"
+                />
+              </div>
+              <ConditionBuilder
+                rule={conversion.rule || { conditions: [], logic: "AND" }}
+                setRule={(newRule) => {
+                  updateTagConversion(index, "rule", newRule);
+                }}
+              />
+              {errors[index] && (
+                <p className="text-sm text-red-500">{errors[index]}</p>
+              )}
+            </div>
           )}
         </div>
       ))}

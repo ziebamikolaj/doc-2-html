@@ -1,8 +1,11 @@
 "use client";
 
+import type { ConversionSettings } from "@/app/convert/types/conversionSettings";
+import type {
+  AttributeRule,
+  TagConversion,
+} from "@/app/convert/types/conversionTypes";
 import { useState } from "react";
-import byteSize from "byte-size";
-import { File } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,17 +27,15 @@ const Convert = () => {
   const [isConverting, setIsConverting] = useState(false);
   const { toast } = useToast();
 
-  const [ignoreTags, setIgnoreTags] = useState<string[]>([]);
-  const [tagConversions, setTagConversions] = useState<
-    Array<{ from: string; to: string }>
-  >([]);
-  const [attributeRules, setAttributeRules] = useState<
-    Array<{
-      tag: string;
-      attribute: string;
-      value: string;
-      condition: string;
-    }>
+  const [ignoreTags, setIgnoreTags] = useState<string>("");
+  const [tagConversions, setTagConversions] = useState<Array<TagConversion>>(
+    [],
+  );
+  const [attributeRules, setAttributeRules] = useState<Array<AttributeRule>>(
+    [],
+  );
+  const [presets, setPresets] = useState<
+    Array<{ name: string; settings: ConversionSettings }>
   >([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -86,7 +87,7 @@ const Convert = () => {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-236px-65px)] items-start justify-center bg-gradient-to-b from-background to-background/80 p-8">
+    <div className="flex h-[calc(100vh-236px-65px)] items-start justify-center bg-gradient-to-b from-background to-background/80 p-8">
       <div className="flex w-full max-w-6xl flex-col gap-8 md:flex-row">
         <Card className="w-full shadow-lg md:w-1/2">
           <CardHeader className="rounded-t-lg bg-primary/10">
@@ -119,6 +120,8 @@ const Convert = () => {
           setTagConversions={setTagConversions}
           attributeRules={attributeRules}
           setAttributeRules={setAttributeRules}
+          presets={presets}
+          setPresets={setPresets}
         />
       </div>
     </div>

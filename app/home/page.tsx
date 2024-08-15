@@ -15,7 +15,7 @@ const Home = () => {
   const { data: userInfo } = useQuery<UserInfo>({
     queryKey: ["isLoggedIn"],
   });
-  if (!userInfo) return NotFound;
+  if (!userInfo) return <NotFound />;
   return (
     <div className="flex min-h-[calc(100vh-236px-65px)] items-start justify-center bg-gradient-to-b from-background to-background/80 p-8">
       <main className="flex flex-1 flex-col items-center justify-center px-4 py-12 sm:px-6 lg:px-8">

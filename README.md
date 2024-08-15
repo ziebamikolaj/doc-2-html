@@ -17,8 +17,8 @@ DocsConvert is a subscription-based document conversion service built with Next.
 ## Tech Stack
 
 - **Frontend**: Next.js, React, Tailwind CSS
-- **Backend**: Node.js, Prisma ORM
-- **Database**: SQLite (development), PostgreSQL (production)
+- **Backend**: Nest.js, Prisma ORM
+- **Database**: PostgreSQL (production)
 - **Hosting**: Vercel
 - **Icons**: react-icons
 

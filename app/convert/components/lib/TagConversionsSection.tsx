@@ -2,8 +2,16 @@ import type {
   TagConversion,
   TagConversionsSectionProps,
 } from "@/app/convert/types/conversionTypes";
-import React, { useState } from "react";
-import { ChevronDown, ChevronRight, Info, Plus, X } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import {
+  ChevronDown,
+  ChevronRight,
+  GripVertical,
+  Info,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +23,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import ConditionBuilder from "./ConditionBuilder";
+import { StrictModeDroppable } from "./Droppable";
 
 const TagConversionsSection = ({
   tagConversions,
@@ -32,7 +41,7 @@ const TagConversionsSection = ({
         from: "",
         to: "",
         rule: {
-          conditions: [{ property: "", operator: "contains", value: "" }],
+          conditions: [],
           logic: "AND",
         },
       } as TagConversion,
@@ -76,86 +85,139 @@ const TagConversionsSection = ({
     return `${conversion.from} → ${conversion.to}`;
   };
 
+  const onDragEnd = (result: any) => {
+    if (!result.destination) {
+      return;
+    }
+
+    const items = Array.from(tagConversions);
+    const [reorderedItem] = items.splice(result.source.index, 1);
+    items.splice(result.destination.index, 0, reorderedItem as TagConversion);
+
+    setTagConversions(items);
+    validateAndSetErrors("tagConversions", items);
+  };
+
   return (
-    <div className="space-y-4">
-      <h3 className="flex items-center text-lg font-semibold">
-        Tag Conversions
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info className="ml-2 size-4 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Define tag conversions for the output</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </h3>
-      {tagConversions.map((conversion, index) => (
-        <div key={index} className="rounded border bg-secondary/20 p-4">
-          <div className="flex items-center justify-between">
-            <div
-              className="flex-grow cursor-pointer font-medium"
-              onClick={() => toggleConversion(index)}
-            >
-              Conversion {index + 1}: {getConversionSummary(conversion)}
-            </div>
-            <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => toggleConversion(index)}
-              >
-                {expandedConversions.includes(index) ? (
-                  <ChevronDown className="h-4 w-4" />
-                ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeTagConversion(index)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-          {expandedConversions.includes(index) && (
-            <div className="mt-2 space-y-2">
-              <div className="flex items-center space-x-2">
-                <Input
-                  value={conversion.from}
-                  onChange={(e) =>
-                    updateTagConversion(index, "from", e.target.value)
-                  }
-                  placeholder="From tag"
-                />
-                <Input
-                  value={conversion.to}
-                  onChange={(e) =>
-                    updateTagConversion(index, "to", e.target.value)
-                  }
-                  placeholder="To tag"
-                />
-              </div>
-              <ConditionBuilder
-                rule={conversion.rule || { conditions: [], logic: "AND" }}
-                setRule={(newRule) => {
-                  updateTagConversion(index, "rule", newRule);
-                }}
-              />
-              {errors[index] && (
-                <p className="text-sm text-red-500">{errors[index]}</p>
-              )}
+    <DragDropContext onDragEnd={onDragEnd}>
+      <div className="space-y-4">
+        <h3 className="flex items-center text-lg font-semibold">
+          Tag Conversions
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="ml-2 size-4 text-muted-foreground" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Define tag conversions for the output</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </h3>
+
+        <StrictModeDroppable droppableId="tag-conversions-list">
+          {(provided) => (
+            <div {...provided.droppableProps} ref={provided.innerRef}>
+              {tagConversions.map((conversion, index) => (
+                <Draggable
+                  key={`tag-conversion-${index}`}
+                  draggableId={`tag-conversion-${index}`}
+                  index={index}
+                >
+                  {(provided) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      className="mb-2 rounded border bg-secondary/20 p-4"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div
+                          {...provided.dragHandleProps}
+                          className="cursor-move"
+                        >
+                          <GripVertical className="h-5 w-5 text-muted-foreground" />
+                        </div>
+                        <div
+                          className="ml-2 flex-grow cursor-pointer font-medium"
+                          onClick={() => toggleConversion(index)}
+                        >
+                          Conversion {index + 1}:{" "}
+                          {getConversionSummary(conversion)}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => toggleConversion(index)}
+                          >
+                            {expandedConversions.includes(index) ? (
+                              <ChevronDown className="h-4 w-4" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => removeTagConversion(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                      {expandedConversions.includes(index) && (
+                        <div className="mt-2 space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              value={conversion.from}
+                              onChange={(e) =>
+                                updateTagConversion(
+                                  index,
+                                  "from",
+                                  e.target.value,
+                                )
+                              }
+                              placeholder="From tag"
+                            />
+                            <Input
+                              value={conversion.to}
+                              onChange={(e) =>
+                                updateTagConversion(index, "to", e.target.value)
+                              }
+                              placeholder="To tag"
+                            />
+                          </div>
+                          <ConditionBuilder
+                            rule={
+                              conversion.rule || {
+                                conditions: [],
+                                logic: "AND",
+                              }
+                            }
+                            setRule={(newRule) => {
+                              updateTagConversion(index, "rule", newRule);
+                            }}
+                          />
+                          {errors[index] && (
+                            <p className="text-sm text-red-500">
+                              {errors[index]}
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </div>
           )}
-        </div>
-      ))}
-      <Button onClick={addTagConversion} variant="outline" className="w-full">
-        <Plus className="mr-2 size-4" /> Add Tag Conversion
-      </Button>
-    </div>
+        </StrictModeDroppable>
+        <Button onClick={addTagConversion} variant="outline" className="w-full">
+          <Plus className="mr-2 size-4" /> Add Tag Conversion
+        </Button>
+      </div>
+    </DragDropContext>
   );
 };
 

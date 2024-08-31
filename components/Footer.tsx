@@ -37,7 +37,7 @@ const footerData = {
 };
 
 export const Footer = () => (
-  <footer className="bg-muted py-8">
+  <footer className="sticky z-50 bg-muted py-8">
     <div className="container mx-auto max-w-6xl px-4 md:px-6">
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {Object.entries(footerData).map(([section, links]) => (

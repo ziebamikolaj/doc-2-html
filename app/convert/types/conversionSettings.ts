@@ -4,4 +4,5 @@ export interface ConversionSettings {
   ignoreTags: string;
   tagConversions: Array<TagConversion>;
   attributeRules: Array<AttributeRule>;
+  deleteTags: string;
 }

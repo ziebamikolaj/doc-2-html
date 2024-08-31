@@ -13,16 +13,18 @@ import {
 } from "@/components/ui/tooltip";
 
 const PresetsSection = ({
-  currentPreset,
-  setCurrentPreset,
   presets,
-  setPresets,
+  currentPreset,
   ignoreTags,
   tagConversions,
   attributeRules,
+  deleteTags,
+  setPresets,
+  setCurrentPreset,
   setIgnoreTags,
   setTagConversions,
   setAttributeRules,
+  setDeleteTags,
 }: PresetsSectionProps) => {
   const savePreset = () => {
     if (currentPreset.trim() === "") return;
@@ -32,6 +34,7 @@ const PresetsSection = ({
         ignoreTags,
         tagConversions,
         attributeRules,
+        deleteTags,
       } as ConversionSettings,
     };
     setPresets([...presets, newPreset]);
@@ -44,11 +47,12 @@ const PresetsSection = ({
       setIgnoreTags(preset.settings.ignoreTags);
       setTagConversions(preset.settings.tagConversions);
       setAttributeRules(preset.settings.attributeRules);
+      setDeleteTags(preset.settings.deleteTags);
     }
   };
 
   const exportSettings = () => {
-    const settings = { ignoreTags, tagConversions, attributeRules };
+    const settings = { ignoreTags, tagConversions, attributeRules, deleteTags };
     const blob = new Blob([JSON.stringify(settings, null, 2)], {
       type: "application/json",
     });
@@ -70,6 +74,7 @@ const PresetsSection = ({
           setIgnoreTags(settings.ignoreTags);
           setTagConversions(settings.tagConversions);
           setAttributeRules(settings.attributeRules);
+          setDeleteTags(settings.deleteTags);
         } catch (error) {
           console.error("Error parsing settings file:", error);
         }

@@ -1,4 +1,4 @@
-import type { IgnoreTagsSectionProps } from "@/app/convert/types/conversionTypes";
+import type { DeleteTagsSectionProps } from "@/app/convert/types/conversionTypes";
 import React from "react";
 import { Info } from "lucide-react";
 
@@ -10,32 +10,33 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-const IgnoreTagsSection = ({
-  ignoreTags,
-  setIgnoreTags,
+const DeleteTagsSection = ({
+  deleteTags,
+  setDeleteTags,
   errors,
   validateAndSetErrors,
-}: IgnoreTagsSectionProps) => {
+}: DeleteTagsSectionProps) => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newIgnoreTags = e.target.value;
-    setIgnoreTags(newIgnoreTags);
-    validateAndSetErrors("ignoreTags", newIgnoreTags);
+    const newDeleteTags = e.target.value;
+    setDeleteTags(newDeleteTags);
+    validateAndSetErrors("deleteTags", newDeleteTags);
   };
 
   return (
     <div className="space-y-4">
       <h3 className="flex items-center text-lg font-semibold">
-        Tags to Ignore
+        Tags to Delete
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
               <Info className="ml-2 size-4 text-muted-foreground" />
             </TooltipTrigger>
             <TooltipContent>
-              <p>Specify tags to be ignored during conversion</p>
+              <p>Specify tags to be deleted during conversion</p>
               <p>
-                For instance, you can remove all underlines from your document
-                by ignoring the <b>u tag</b>.
+                For instance, you can delete all underlines (
+                <b>with all its content</b>) from your document by deleting the
+                <b> u tag</b>.
               </p>
             </TooltipContent>
           </Tooltip>
@@ -43,7 +44,7 @@ const IgnoreTagsSection = ({
       </h3>
       <div className="space-y-2">
         <Input
-          value={ignoreTags}
+          value={deleteTags}
           onChange={handleInputChange}
           placeholder="e.g., u, b, i"
           className="w-full"
@@ -54,4 +55,4 @@ const IgnoreTagsSection = ({
   );
 };
 
-export default IgnoreTagsSection;
+export default DeleteTagsSection;

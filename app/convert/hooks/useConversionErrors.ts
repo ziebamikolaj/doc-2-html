@@ -6,18 +6,26 @@ import { useState } from "react";
 export const useConversionErrors = () => {
   const [errors, setErrors] = useState<{
     ignoreTags: string[];
+    deleteTags: string[];
     tagConversions: Array<string | null>;
     attributeRules: Array<string | null>;
     conditions: Array<string | null>;
   }>({
     ignoreTags: [],
+    deleteTags: [],
     tagConversions: [],
     attributeRules: [],
     conditions: [],
   });
 
   const validateIgnoreTag = (tag: string): string => {
-    return tag.trim() !== "" ? "" : "Tag cannot be empty";
+    if (tag.trim() === "") {
+      return "Tag must be specified\t";
+    }
+    if (tag.includes(" ")) {
+      return "Tag cannot contain spaces\t";
+    }
+    return "";
   };
 
   const validateTagConversion = (from: string, to: string): string => {
@@ -31,6 +39,9 @@ export const useConversionErrors = () => {
     attribute: string,
     value: string,
   ): string => {
+    if (attribute === undefined || value === undefined) {
+      return "Attribute and Value must be specified";
+    }
     if (tag.trim() === "") {
       return "Tag must be specified";
     }
@@ -67,7 +78,9 @@ export const useConversionErrors = () => {
     let newErrors: any = {};
 
     if (field === "ignoreTags") {
-      newErrors.ignoreTags = value.split(",").map(validateIgnoreTag);
+      if (value.split(",").length > 1) {
+        newErrors.ignoreTags = value.split(",").map(validateIgnoreTag);
+      }
     } else if (field === "tagConversions") {
       newErrors.tagConversions = value.map(
         (conv: { from: string; to: string }) =>
@@ -86,6 +99,10 @@ export const useConversionErrors = () => {
           rule.conditions.map(validateCondition).filter(Boolean)[0] || null
         );
       });
+    } else if (field === "deleteTags") {
+      if (value.split(",").length > 1) {
+        newErrors.deleteTags = value.split(",").map(validateIgnoreTag);
+      }
     }
 
     setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));

@@ -5,11 +5,14 @@ import { useConversionErrors } from "@/app/convert/hooks/useConversionErrors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import AttributeRulesSection from "./lib/AttributeRulesSection";
+import DeleteTagsSection from "./lib/DeleteTagsSection";
 import IgnoreTagsSection from "./lib/IgnoreTagsSection";
 import PresetsSection from "./lib/PresetsSection";
 import TagConversionsSection from "./lib/TagConversionsSection";
 
 const ConversionOptions = ({
+  deleteTags,
+  setDeleteTags,
   ignoreTags,
   setIgnoreTags,
   tagConversions,
@@ -23,14 +26,16 @@ const ConversionOptions = ({
   const { errors, validateAndSetErrors } = useConversionErrors();
 
   return (
-    <Card className="w-full shadow-lg md:w-1/2">
-      <CardHeader className="rounded-t-lg bg-primary/10">
-        <CardTitle className="text-center text-2xl font-bold text-primary">
+    <Card className="shadow-xl transition-all duration-300 hover:shadow-2xl">
+      <CardHeader className="bg-primary text-primary-foreground">
+        <CardTitle className="text-center text-2xl font-bold">
           Conversion Options
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-8 overflow-auto p-6 md:h-[58vh]">
+      <CardContent className="max-h-[calc(100vh-20rem)] space-y-6 overflow-y-auto p-6">
         <PresetsSection
+          deleteTags={deleteTags}
+          setDeleteTags={setDeleteTags}
           currentPreset={currentPreset}
           setCurrentPreset={setCurrentPreset}
           presets={presets}
@@ -46,6 +51,12 @@ const ConversionOptions = ({
           ignoreTags={ignoreTags}
           setIgnoreTags={setIgnoreTags}
           errors={errors.ignoreTags}
+          validateAndSetErrors={validateAndSetErrors}
+        />
+        <DeleteTagsSection
+          deleteTags={deleteTags}
+          setDeleteTags={setDeleteTags}
+          errors={errors.deleteTags}
           validateAndSetErrors={validateAndSetErrors}
         />
         <TagConversionsSection

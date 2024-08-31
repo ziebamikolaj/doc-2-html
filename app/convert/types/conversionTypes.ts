@@ -3,6 +3,8 @@ import type { ConversionSettings } from "./conversionSettings";
 export interface ConversionOptionsProps {
   ignoreTags: string;
   setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
+  deleteTags: string;
+  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
   tagConversions: Array<TagConversion>;
   setTagConversions: React.Dispatch<React.SetStateAction<Array<TagConversion>>>;
   attributeRules: Array<AttributeRule>;
@@ -23,14 +25,23 @@ export interface PresetsSectionProps {
   ignoreTags: string;
   tagConversions: Array<TagConversion>;
   attributeRules: Array<AttributeRule>;
+  deleteTags: string;
   setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
   setTagConversions: React.Dispatch<React.SetStateAction<Array<TagConversion>>>;
   setAttributeRules: React.Dispatch<React.SetStateAction<Array<AttributeRule>>>;
+  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface IgnoreTagsSectionProps {
   ignoreTags: string;
   setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
+  errors: string[];
+  validateAndSetErrors: (field: string, value: any) => void;
+}
+
+export interface DeleteTagsSectionProps {
+  deleteTags: string;
+  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
   errors: string[];
   validateAndSetErrors: (field: string, value: any) => void;
 }
@@ -69,5 +80,5 @@ export interface AttributeRule {
   tag: string;
   attribute: string;
   value: string;
-  rule: Rule;
+  rule?: Rule;
 }

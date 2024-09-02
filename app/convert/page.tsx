@@ -54,6 +54,7 @@ const Convert = () => {
         ignoreTags,
         tagConversions,
         attributeRules,
+        deleteTags,
       };
       formData.append("options", JSON.stringify(options));
 

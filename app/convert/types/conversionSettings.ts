@@ -1,4 +1,4 @@
-import type { AttributeRule, TagConversion } from "./conversionTypes";
+import type { AttributeRule, TagConversion, IgnoreTagRule, DeleteTagRule } from "./conversionTypes";
 
 export interface ConversionSettings {
   ignoreTags: Array<IgnoreTagRule>;

@@ -62,7 +62,7 @@ export interface AttributeRulesSectionProps {
 
 export interface Condition {
   property: string;
-  operator: "contains" | "startsWith" | "endsWith" | "equals" | "matches" | "isParentOf" | "isChildOf" | "isEmpty";
+  operator: "contains" | "startsWith" | "endsWith" | "equals" | "matches" | "isParentOf" | "isChildOf" | "isEmptyInside" | "isNotEmptyInside";
   value: string;
 }
 

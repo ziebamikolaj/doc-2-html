@@ -2,7 +2,7 @@ import type {
   TagConversion,
   TagConversionsSectionProps,
 } from "@/app/convert/types/conversionTypes";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   ChevronDown,
   ChevronRight,
@@ -15,12 +15,6 @@ import { DragDropContext, Draggable } from "react-beautiful-dnd";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 import ConditionBuilder from "./ConditionBuilder";
 import { StrictModeDroppable } from "./Droppable";
@@ -109,20 +103,6 @@ const TagConversionsSection = ({
   return (
     <DragDropContext onDragEnd={onDragEnd}>
       <div className="space-y-4">
-        <h3 className="flex items-center text-lg font-semibold">
-          Tag Conversions
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Info className="ml-2 size-4 text-muted-foreground" />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Define tag conversions for the output</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </h3>
-
         <StrictModeDroppable droppableId="tag-conversions-list">
           {(provided) => (
             <div {...provided.droppableProps} ref={provided.innerRef}>

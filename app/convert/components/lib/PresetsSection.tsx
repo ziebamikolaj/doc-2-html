@@ -1,7 +1,7 @@
 import type { ConversionSettings } from "@/app/convert/types/conversionSettings";
 import type { PresetsSectionProps } from "@/app/convert/types/conversionTypes";
-import React from "react";
-import { Info } from "lucide-react";
+import React, { useState } from "react";
+import { Info, ChevronDown, ChevronRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 
 interface PresetsSection extends PresetsSectionProps {
   savePreset: (name: string, settings: ConversionSettings) => void;
@@ -33,6 +34,8 @@ const PresetsSection = ({
   savePreset,
   loadPreset,
 }: PresetsSection) => {
+  const [isPresetListOpen, setIsPresetListOpen] = useState(false);
+
   const handleSavePreset = () => {
     if (currentPreset.trim() === "") return;
     const newPreset = {
@@ -117,17 +120,27 @@ const PresetsSection = ({
           <Input type="file" accept=".json" onChange={importSettings} />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-2">
-        {presets.map((preset, index) => (
-          <Button
-            key={index}
-            onClick={() => handleLoadPreset(preset.name)}
-            variant="outline"
-          >
-            {preset.name}
+      <Collapsible open={isPresetListOpen} onOpenChange={setIsPresetListOpen}>
+        <CollapsibleTrigger asChild>
+          <Button variant="outline" className="w-full justify-between">
+            Saved Presets
+            {isPresetListOpen ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
-        ))}
-      </div>
+        </CollapsibleTrigger>
+        <CollapsibleContent className="mt-2">
+          <div className="grid grid-cols-2 gap-2">
+            {presets.map((preset, index) => (
+              <Button
+                key={index}
+                onClick={() => handleLoadPreset(preset.name)}
+                variant="outline"
+              >
+                {preset.name}
+              </Button>
+            ))}
+          </div>
+        </CollapsibleContent>
+      </Collapsible>
     </div>
   );
 };

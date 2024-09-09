@@ -11,7 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 
-import ConversionOptions from "./components/ConversionOptions";
+import {ConversionOptions} from "./components/ConversionOptions";
 import FilePreview from "./components/FilePreview";
 import FileUpload from "./components/FileUpload";
 import ConvertedContent from "./components/lib/ConvertedContent";
@@ -21,6 +21,7 @@ import OutputFormatSelector from "./components/OutputFormatSelector";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { apiFetchClient } from "@/lib/apiFetchClient";
+import type { IgnoreTagRule, DeleteTagRule } from "./types/conversionTypes";
 
 const acceptedFileTypes = [
   "application/pdf",
@@ -33,8 +34,8 @@ const Convert = () => {
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
 
-  const [deleteTags, setDeleteTags] = useState<string>(""); // Updated type
-  const [ignoreTags, setIgnoreTags] = useState<string>("style,script");
+  const [ignoreTags, setIgnoreTags] = useState<IgnoreTagRule[]>([]);
+  const [deleteTags, setDeleteTags] = useState<DeleteTagRule[]>([]);
   const [tagConversions, setTagConversions] = useState<Array<TagConversion>>(
     [],
   );

@@ -2,31 +2,38 @@
 
 import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
 import { useState } from "react";
-import type { AttributeRule } from "@/app/convert/types/conversionTypes";
+import type { AttributeRule, IgnoreTagRule, DeleteTagRule } from "@/app/convert/types/conversionTypes";
+
 interface ConversionErrors {
-  ignoreTags: string;
-  deleteTags: string;
+  ignoreTags: { [key: number]: string };
+  deleteTags: { [key: number]: string };
   tagConversions: { [key: number]: string };
   attributeRules: { [key: number]: string };
 }
 
 export function useConversionErrors() {
   const [errors, setErrors] = useState<ConversionErrors>({
-    ignoreTags: "",
-    deleteTags: "",
+    ignoreTags: {},
+    deleteTags: {},
     tagConversions: {},
     attributeRules: {},
   });
 
   const validateAndSetErrors = (field: string, value: any) => {
     let newErrors: any = {};
-
+  
     if (field === "ignoreTags") {
-       if(value === "") newErrors.ignoreTags = "";
-      else newErrors.ignoreTags = value.split(",").map(validateIgnoreTag);
+      newErrors.ignoreTags = value.reduce((acc: { [key: number]: string }, rule: IgnoreTagRule, index: number) => {
+        const error = validateIgnoreTagRule(rule);
+        if (error) acc[index] = error;
+        return acc;
+      }, {});
     } else if (field === "deleteTags") {
-      if(value === "") newErrors.deleteTags = "";
-      else newErrors.deleteTags = value.split(",").map(validateIgnoreTag);
+      newErrors.deleteTags = value.reduce((acc: { [key: number]: string }, rule: DeleteTagRule, index: number) => {
+        const error = validateDeleteTagRule(rule);
+        if (error) acc[index] = error;
+        return acc;
+      }, {});
     } else if (field === "tagConversions") {
       newErrors.tagConversions = value.reduce((acc: { [key: number]: string }, conversion: { from: string, to: string }, index: number) => {
         const error = validateTagConversion(conversion.from, conversion.to);
@@ -40,7 +47,7 @@ export function useConversionErrors() {
         return acc;
       }, {});
     }
-
+  
     setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));
   };
 
@@ -100,5 +107,24 @@ export function useConversionErrors() {
     return "";
   };
 
+  const validateIgnoreTagRule = (rule: IgnoreTagRule): string => {
+    if (rule.tag.trim() === "") {
+      return "Tag must be specified";
+    }
+    if (rule.rule && rule.rule.conditions.length > 0) {
+      return validateRule(rule.rule);
+    }
+    return "";
+  };
+  
+  const validateDeleteTagRule = (rule: DeleteTagRule): string => {
+    if (rule.tag.trim() === "") {
+      return "Tag must be specified";
+    }
+    if (rule.rule && rule.rule.conditions.length > 0) {
+      return validateRule(rule.rule);
+    }
+    return "";
+  };
   return { errors, validateAndSetErrors };
 };

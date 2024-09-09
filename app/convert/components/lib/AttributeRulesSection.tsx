@@ -101,25 +101,13 @@ const AttributeRulesSection = ({
     items.splice(result.destination.index, 0, reorderedItem as AttributeRule);
 
     setAttributeRules(items);
-    
-    validateAndSetErrors("attributeRules", items);
+    if (validateAndSetErrors) { 
+      validateAndSetErrors("attributeRules", items);
+    }
   };
 
   return (
     <div className="space-y-4">
-      <h3 className="flex items-center text-lg font-semibold">
-        Attribute Rules
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Info className="ml-2 size-4 text-muted-foreground" />
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Set rules for handling attributes during conversion</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </h3>
       <DragDropContext onDragEnd={onDragEnd}>
         <StrictModeDroppable droppableId="attribute-rules-list">
           {(provided) => (

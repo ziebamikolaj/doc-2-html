@@ -1,23 +1,23 @@
-import React from "react";
-
+import React, { useState } from "react";
 import { useConversionErrors } from "@/app/convert/hooks/useConversionErrors";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { Card, CardContent } from "@/components/ui/card";
 import AttributeRulesSection from "./lib/AttributeRulesSection";
 import DeleteTagsSection from "./lib/DeleteTagsSection";
 import IgnoreTagsSection from "./lib/IgnoreTagsSection";
 import PresetsSection from "./lib/PresetsSection";
 import TagConversionsSection from "./lib/TagConversionsSection";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { Button } from "@/components/ui/button";
+import { ChevronDown, ChevronRight } from "lucide-react";
 
 import type { ConversionSettings } from "@/app/convert/types/conversionSettings";
-import type { TagConversion } from "@/app/convert/types/conversionTypes";
-import type { AttributeRule } from "@/app/convert/types/conversionTypes";
+import type { TagConversion, AttributeRule, IgnoreTagRule, DeleteTagRule } from "@/app/convert/types/conversionTypes";
 
 interface ConversionOptionsProps {
-  deleteTags: string;
-  setDeleteTags: (deleteTags: string) => void;
-  ignoreTags: string;
-  setIgnoreTags: (ignoreTags: string) => void;
+  deleteTags: DeleteTagRule[];
+  setDeleteTags: (deleteTags: DeleteTagRule[]) => void;
+  ignoreTags: IgnoreTagRule[];
+  setIgnoreTags: (ignoreTags: IgnoreTagRule[]) => void;
   tagConversions: TagConversion[];
   setTagConversions: (tagConversions: TagConversion[]) => void;
   attributeRules: AttributeRule[];
@@ -30,7 +30,7 @@ interface ConversionOptionsProps {
   setCurrentPreset: React.Dispatch<React.SetStateAction<string>>;
 }
 
-const ConversionOptions: React.FC<ConversionOptionsProps> = ({
+export const ConversionOptions: React.FC<ConversionOptionsProps> = ({
   deleteTags,
   setDeleteTags,
   ignoreTags,
@@ -47,6 +47,27 @@ const ConversionOptions: React.FC<ConversionOptionsProps> = ({
   setCurrentPreset,
 }) => {
   const { errors, validateAndSetErrors } = useConversionErrors();
+  const [openSections, setOpenSections] = useState<string[]>(["presets"]);
+
+  const toggleSection = (section: string) => {
+    setOpenSections(prev =>
+      prev.includes(section)
+        ? prev.filter(s => s !== section)
+        : [...prev, section]
+    );
+  };
+
+  const renderCollapsibleSection = (title: string, content: React.ReactNode) => (
+    <Collapsible open={openSections.includes(title.toLowerCase())} onOpenChange={() => toggleSection(title.toLowerCase())}>
+      <CollapsibleTrigger asChild>
+        <Button variant="outline" className="w-full justify-between py-6 text-lg font-semibold">
+          {title}
+          {openSections.includes(title.toLowerCase()) ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+        </Button>
+      </CollapsibleTrigger>
+      <CollapsibleContent className="pt-4">{content}</CollapsibleContent>
+    </Collapsible>
+  );
 
   return (
     <Card className="shadow-xl transition-all duration-300 hover:shadow-2xl">
@@ -67,33 +88,39 @@ const ConversionOptions: React.FC<ConversionOptionsProps> = ({
           currentPreset={currentPreset}
           setCurrentPreset={setCurrentPreset}
         />
-        <IgnoreTagsSection
-          ignoreTags={ignoreTags}
-          setIgnoreTags={setIgnoreTags}
-          errors={errors.ignoreTags}
-          validateAndSetErrors={validateAndSetErrors}
-        />
-        <DeleteTagsSection
-          deleteTags={deleteTags}
-          setDeleteTags={setDeleteTags}
-          errors={errors.deleteTags}
-          validateAndSetErrors={validateAndSetErrors}
-        />
-        <TagConversionsSection
-          tagConversions={tagConversions}
-          setTagConversions={setTagConversions}
-          errors={errors.tagConversions}
-          validateAndSetErrors={validateAndSetErrors}
-        />
-        <AttributeRulesSection
-          attributeRules={attributeRules}
-          setAttributeRules={setAttributeRules}
-          errors={errors.attributeRules}
-          validateAndSetErrors={validateAndSetErrors}
-        />
+        {renderCollapsibleSection("Ignore Tags", 
+          <IgnoreTagsSection
+            ignoreTags={ignoreTags}
+            setIgnoreTags={setIgnoreTags}
+            errors={errors.ignoreTags}
+            validateAndSetErrors={validateAndSetErrors}
+          />
+        )}
+        {renderCollapsibleSection("Delete Tags", 
+          <DeleteTagsSection
+            deleteTags={deleteTags}
+            setDeleteTags={setDeleteTags}
+            errors={errors.deleteTags}
+            validateAndSetErrors={validateAndSetErrors}
+          />
+        )}
+        {renderCollapsibleSection("Tag Conversions", 
+          <TagConversionsSection
+            tagConversions={tagConversions}
+            setTagConversions={setTagConversions}
+            errors={errors.tagConversions}
+            validateAndSetErrors={validateAndSetErrors}
+          />
+        )}
+        {renderCollapsibleSection("Attribute Rules", 
+          <AttributeRulesSection
+            attributeRules={attributeRules}
+            setAttributeRules={setAttributeRules}
+            errors={errors.attributeRules}
+            validateAndSetErrors={validateAndSetErrors}
+          />
+        )}
       </CardContent>
     </Card>
   );
 };
-
-export default ConversionOptions;

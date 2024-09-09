@@ -1,18 +1,20 @@
 import type { ConversionSettings } from "./conversionSettings";
 
 export interface ConversionOptionsProps {
-  ignoreTags: string;
-  setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
-  deleteTags: string;
-  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
-  tagConversions: Array<TagConversion>;
-  setTagConversions: React.Dispatch<React.SetStateAction<Array<TagConversion>>>;
-  attributeRules: Array<AttributeRule>;
-  setAttributeRules: React.Dispatch<React.SetStateAction<Array<AttributeRule>>>;
+  deleteTags: DeleteTagRule[];
+  setDeleteTags: (deleteTags: DeleteTagRule[]) => void;
+  ignoreTags: IgnoreTagRule[];
+  setIgnoreTags: (ignoreTags: IgnoreTagRule[]) => void;
+  tagConversions: TagConversion[];
+  setTagConversions: (tagConversions: TagConversion[]) => void;
+  attributeRules: AttributeRule[];
+  setAttributeRules: (attributeRules: AttributeRule[]) => void;
   presets: Array<{ name: string; settings: ConversionSettings }>;
-  setPresets: React.Dispatch<
-    React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>
-  >;
+  setPresets: React.Dispatch<React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>>;
+  savePreset: (name: string, settings: ConversionSettings) => void;
+  loadPreset: (name: string) => void;
+  currentPreset: string;
+  setCurrentPreset: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export interface PresetsSectionProps {
@@ -20,27 +22,27 @@ export interface PresetsSectionProps {
   setPresets: React.Dispatch<React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>>;
   currentPreset: string;
   setCurrentPreset: React.Dispatch<React.SetStateAction<string>>;
-  ignoreTags: string;
+  ignoreTags: IgnoreTagRule[];
   tagConversions: TagConversion[];
   attributeRules: AttributeRule[];
-  deleteTags: string;
-  setIgnoreTags: (ignoreTags: string) => void;
+  deleteTags: DeleteTagRule[];
+  setIgnoreTags: (ignoreTags: IgnoreTagRule[]) => void;
   setTagConversions: (tagConversions: TagConversion[]) => void;
   setAttributeRules: (attributeRules: AttributeRule[]) => void;
-  setDeleteTags: (deleteTags: string) => void;
+  setDeleteTags: (deleteTags: DeleteTagRule[]) => void;
 }
 
 export interface IgnoreTagsSectionProps {
-  ignoreTags: string;
-  setIgnoreTags: (ignoreTags: string) => void;
-  errors?: string;
+  ignoreTags: IgnoreTagRule[];
+  setIgnoreTags: (ignoreTags: IgnoreTagRule[]) => void;
+  errors?: { [key: number]: string };
   validateAndSetErrors?: (field: string, value: any) => void;
 }
 
 export interface DeleteTagsSectionProps {
-  deleteTags: string;
-  setDeleteTags: (deleteTags: string) => void;
-  errors?: string[;
+  deleteTags: DeleteTagRule[];
+  setDeleteTags: (deleteTags: DeleteTagRule[]) => void;
+  errors?: { [key: number]: string };
   validateAndSetErrors?: (field: string, value: any) => void;
 }
 
@@ -60,7 +62,7 @@ export interface AttributeRulesSectionProps {
 
 export interface Condition {
   property: string;
-  operator: "contains" | "startsWith" | "endsWith" | "equals" | "matches";
+  operator: "contains" | "startsWith" | "endsWith" | "equals" | "matches" | "isParentOf" | "isChildOf" | "isEmpty";
   value: string;
 }
 
@@ -68,6 +70,7 @@ export interface Rule {
   conditions: Condition[];
   logic: "AND" | "OR";
 }
+
 export interface TagConversion {
   from: string;
   to: string;
@@ -78,5 +81,15 @@ export interface AttributeRule {
   tag: string;
   attribute: string;
   value: string;
+  rule?: Rule;
+}
+
+export interface IgnoreTagRule {
+  tag: string;
+  rule?: Rule;
+}
+
+export interface DeleteTagRule {
+  tag: string;
   rule?: Rule;
 }

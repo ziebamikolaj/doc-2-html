@@ -1,257 +1,162 @@
-import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
-import React, { useCallback, useState } from "react";
-import {
-  ChevronDown,
-  ChevronRight,
-  GripVertical,
-  Plus,
-  Trash2,
-} from "lucide-react";
-import { DragDropContext, Draggable } from "react-beautiful-dnd";
-
-import { Button } from "@/components/ui/button";
+import React, { useState } from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-
+import { Button } from "@/components/ui/button";
+import { Plus, Trash2, GripVertical, ChevronDown, ChevronRight } from "lucide-react";
+import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
+import { DragDropContext, Draggable } from "react-beautiful-dnd";
 import { StrictModeDroppable } from "./Droppable";
 
 interface ConditionBuilderProps {
   rule: Rule;
-  setRule: (newRule: Rule) => void;
+  setRule: (rule: Rule) => void;
 }
 
-const operators = [
-  "Contains",
-  "Starts with",
-  "Ends with",
-  "Equals",
-  "Matches",
-  "Does not contain",
-  "Does not start with",
-  "Does not end with",
-  "Does not equal",
-  "Does not match",
-  "Regex (syntax //gm)",
-];
-
-const getConditionSummary = (condition: Condition) => {
-  if (!condition.property || !condition.operator || !condition.value) {
-    return "Not set";
-  }
-  return `${condition.property} ${condition.operator} ${condition.value}`.trim();
-};
-
-const ConditionBuilder = ({ rule, setRule }: ConditionBuilderProps) => {
+const ConditionBuilder: React.FC<ConditionBuilderProps> = ({ rule, setRule }) => {
   const [expandedConditions, setExpandedConditions] = useState<number[]>([]);
 
-  const addCondition = useCallback(() => {
-    const newIndex = rule.conditions.length;
+  const addCondition = () => {
+    const newCondition: Condition = { property: "", operator: "contains", value: "" };
+    const newConditions = [...rule.conditions, newCondition];
+    setRule({ ...rule,  conditions: newConditions });
+    setExpandedConditions([...expandedConditions, newConditions.length - 1]);
+  };
+
+  const removeCondition = (index: number) => {
     setRule({
       ...rule,
-      conditions: [
-        ...rule.conditions,
-        { property: "", operator: "contains", value: "" },
-      ],
+      conditions: rule.conditions.filter((_, i) => i !== index),
     });
-    setExpandedConditions([newIndex]);
-  }, [rule, setRule]);
+    setExpandedConditions(expandedConditions.filter(i => i !== index).map(i => i > index ? i - 1 : i));
+  };
 
-  const updateCondition = useCallback(
-    (index: number, field: keyof Condition, value: string) => {
-      setRule({
-        ...rule,
-        conditions: rule.conditions.map((cond, i) =>
-          i === index ? { ...cond, [field]: value } : cond,
-        ),
-      });
-    },
-    [rule, setRule],
-  );
+  const updateCondition = (index: number, field: keyof Condition, value: string) => {
+    setRule({
+      ...rule,
+      conditions: rule.conditions.map((condition, i) =>
+        i === index ? { ...condition, [field]: value } : condition
+      ),
+    });
+  };
 
-  const deleteCondition = useCallback(
-    (index: number) => {
-      setRule({
-        ...rule,
-        conditions: rule.conditions.filter((_, i) => i !== index),
-      });
-      setExpandedConditions(expandedConditions.filter((i) => i !== index));
-    },
-    [rule, setRule, expandedConditions],
-  );
-
-  const updateLogic = useCallback(
-    (logic: "AND" | "OR") => {
-      setRule({ ...rule, logic });
-    },
-    [rule, setRule],
-  );
-
-  const toggleCondition = useCallback(
-    (index: number) => {
-      setExpandedConditions(
-        expandedConditions.includes(index)
-          ? expandedConditions.filter((i) => i !== index)
-          : [...expandedConditions, index],
-      );
-    },
-    [expandedConditions],
-  );
+  const toggleCondition = (index: number) => {
+    setExpandedConditions(
+      expandedConditions.includes(index)
+        ? expandedConditions.filter((i) => i !== index)
+        : [...expandedConditions, index]
+    );
+  };
 
   const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
     const newConditions = Array.from(rule.conditions);
     const [reorderedItem] = newConditions.splice(result.source.index, 1);
-    newConditions.splice(
-      result.destination.index,
-      0,
-      reorderedItem as Condition,
-    );
+    newConditions.splice(result.destination.index, 0, reorderedItem as Condition);
 
     setRule({ ...rule, conditions: newConditions });
   };
 
-  if (!rule.conditions || rule.conditions.length === 0) {
-    return (
-      <Button
-        onClick={addCondition}
-        variant="outline"
-        size="sm"
-        className="w-full"
-      >
-        <Plus className="mr-2 h-4 w-4" /> Add Condition
-      </Button>
-    );
-  }
+  const renderInputs = (condition: Condition, index: number) => {
+    switch (condition.operator) {
+      case "isEmptyInside":
+      case "isNotEmptyInside":
+        return null;
+      case "isParentOf":
+      case "isChildOf":
+        return (
+          <Input
+            value={condition.value}
+            onChange={(e) => updateCondition(index, "value", e.target.value)}
+            placeholder="Value"
+            className="flex-grow"
+          />
+        );
+      default:
+        return (
+          <>
+            <Input
+              value={condition.property}
+              onChange={(e) => updateCondition(index, "property", e.target.value)}
+              placeholder="Property"
+              className="flex-grow"
+            />
+            <Input
+              value={condition.value}
+              onChange={(e) => updateCondition(index, "value", e.target.value)}
+              placeholder="Value"
+              className="flex-grow"
+            />
+          </>
+        );
+    }
+  };
 
   return (
-    <div className="space-y-4">
-      {rule.conditions && rule.conditions.length > 1 && (
-        <Select onValueChange={updateLogic} value={rule.logic}>
-          <SelectTrigger className="w-[100px]">
-            <SelectValue placeholder="Logic" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="AND">AND</SelectItem>
-            <SelectItem value="OR">OR</SelectItem>
-          </SelectContent>
-        </Select>
-      )}
-      <DragDropContext onDragEnd={onDragEnd}>
-        <StrictModeDroppable droppableId="conditions-list">
-          {(provided) => (
-            <div {...provided.droppableProps} ref={provided.innerRef}>
-              {rule.conditions.map((condition, index) => (
-                <Draggable
-                  key={`condition-${index}`}
-                  draggableId={`condition-${index}`}
-                  index={index}
-                >
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      className="mb-2 rounded-md border p-2"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div
-                          {...provided.dragHandleProps}
-                          className="cursor-move"
-                        >
-                          <GripVertical className="h-5 w-5 text-muted-foreground" />
-                        </div>
-                        <div
-                          className="ml-2 flex-grow cursor-pointer font-medium"
-                          onClick={() => toggleCondition(index)}
-                        >
-                          Condition {index + 1}:{" "}
-                          {getConditionSummary(condition)}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => toggleCondition(index)}
-                          >
-                            {expandedConditions.includes(index) ? (
-                              <ChevronDown className="h-4 w-4" />
-                            ) : (
-                              <ChevronRight className="h-4 w-4" />
-                            )}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => deleteCondition(index)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+    <DragDropContext onDragEnd={onDragEnd}>
+      <StrictModeDroppable droppableId="conditions">
+        {(provided) => (
+          <div {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+            {rule.conditions.map((condition, index) => (
+              <Draggable key={`condition-${index}`} draggableId={`condition-${index}`} index={index}>
+                {(provided) => (
+                  <div
+                    ref={provided.innerRef}
+                    {...provided.draggableProps}
+                    className="mb-2 rounded border bg-secondary/20 p-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div {...provided.dragHandleProps} className="cursor-move">
+                        <GripVertical className="h-5 w-5 text-muted-foreground" />
                       </div>
-                      {expandedConditions.includes(index) && (
-                        <div className="mt-2 space-y-2">
-                          <Input
-                            value={condition.property}
-                            onChange={(e) =>
-                              updateCondition(index, "property", e.target.value)
-                            }
-                            placeholder="Property"
-                            className="w-full"
-                          />
-                          <Select
-                            value={condition.operator}
-                            onValueChange={(value) =>
-                              updateCondition(index, "operator", value)
-                            }
-                          >
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select operator" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {operators.map((op) => (
-                                <SelectItem
-                                  key={op}
-                                  value={op.toLowerCase().replace(/ /g, "")}
-                                >
-                                  {op}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <Input
-                            value={condition.value}
-                            onChange={(e) =>
-                              updateCondition(index, "value", e.target.value)
-                            }
-                            placeholder="Value"
-                            className="w-full"
-                          />
-                        </div>
-                      )}
+                      <div className="ml-2 flex-grow cursor-pointer font-medium" onClick={() => toggleCondition(index)}>
+                        Condition {index + 1}: {condition.property} {condition.operator} {condition.value}
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button variant="ghost" size="sm" onClick={() => toggleCondition(index)}>
+                          {expandedConditions.includes(index) ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => removeCondition(index)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </StrictModeDroppable>
-      </DragDropContext>
-      <Button
-        onClick={addCondition}
-        variant="outline"
-        size="sm"
-        className="w-full"
-      >
+                    {expandedConditions.includes(index) && (
+                      <div className="mt-2 space-y-2">
+                        <Select
+                          value={condition.operator}
+                          onValueChange={(value) => updateCondition(index, "operator", value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select operator" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="contains">Contains</SelectItem>
+                            <SelectItem value="startsWith">Starts with</SelectItem>
+                            <SelectItem value="endsWith">Ends with</SelectItem>
+                            <SelectItem value="equals">Equals</SelectItem>
+                            <SelectItem value="matches">Matches</SelectItem>
+                            <SelectItem value="isParentOf">Is parent of</SelectItem>
+                            <SelectItem value="isChildOf">Is child of</SelectItem>
+                            <SelectItem value="isEmptyInside">Is empty inside</SelectItem>
+                            <SelectItem value="isNotEmptyInside">Is not empty inside</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        {renderInputs(condition, index)}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </div>
+        )}
+      </StrictModeDroppable>
+      <Button onClick={addCondition} variant="outline" className="w-full mt-2">
         <Plus className="mr-2 h-4 w-4" /> Add Condition
       </Button>
-    </div>
+    </DragDropContext>
   );
 };
 

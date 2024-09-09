@@ -2,21 +2,47 @@
 
 import type { Condition, Rule } from "@/app/convert/types/conversionTypes";
 import { useState } from "react";
+import type { AttributeRule } from "@/app/convert/types/conversionTypes";
+interface ConversionErrors {
+  ignoreTags: string;
+  deleteTags: string;
+  tagConversions: { [key: number]: string };
+  attributeRules: { [key: number]: string };
+}
 
-export const useConversionErrors = () => {
-  const [errors, setErrors] = useState<{
-    ignoreTags: string[];
-    deleteTags: string[];
-    tagConversions: Array<string | null>;
-    attributeRules: Array<string | null>;
-    conditions: Array<string | null>;
-  }>({
-    ignoreTags: [],
-    deleteTags: [],
-    tagConversions: [],
-    attributeRules: [],
-    conditions: [],
+export function useConversionErrors() {
+  const [errors, setErrors] = useState<ConversionErrors>({
+    ignoreTags: "",
+    deleteTags: "",
+    tagConversions: {},
+    attributeRules: {},
   });
+
+  const validateAndSetErrors = (field: string, value: any) => {
+    let newErrors: any = {};
+
+    if (field === "ignoreTags") {
+       if(value === "") newErrors.ignoreTags = "";
+      else newErrors.ignoreTags = value.split(",").map(validateIgnoreTag);
+    } else if (field === "deleteTags") {
+      if(value === "") newErrors.deleteTags = "";
+      else newErrors.deleteTags = value.split(",").map(validateIgnoreTag);
+    } else if (field === "tagConversions") {
+      newErrors.tagConversions = value.reduce((acc: { [key: number]: string }, conversion: { from: string, to: string }, index: number) => {
+        const error = validateTagConversion(conversion.from, conversion.to);
+        if (error) acc[index] = error;
+        return acc;
+      }, {});
+    } else if (field === "attributeRules") {
+      newErrors.attributeRules = value.reduce((acc: { [key: number]: string }, rule: AttributeRule, index: number) => {
+        const error = validateAttributeRule(rule.tag, rule.attribute, rule.value);  
+        if (error) acc[index] = error;
+        return acc;
+      }, {});
+    }
+
+    setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));
+  };
 
   const validateIgnoreTag = (tag: string): string => {
     if (tag.trim() === "") {
@@ -72,40 +98,6 @@ export const useConversionErrors = () => {
       return "Logic (AND/OR) must be specified for multiple conditions";
     }
     return "";
-  };
-
-  const validateAndSetErrors = (field: string, value: any) => {
-    let newErrors: any = {};
-
-    if (field === "ignoreTags") {
-      if (value.split(",").length > 1) {
-        newErrors.ignoreTags = value.split(",").map(validateIgnoreTag);
-      }
-    } else if (field === "tagConversions") {
-      newErrors.tagConversions = value.map(
-        (conv: { from: string; to: string }) =>
-          validateTagConversion(conv.from, conv.to),
-      );
-    } else if (field === "attributeRules") {
-      newErrors.attributeRules = value.map(
-        (rule: { tag: string; attribute: string; value: string }) =>
-          validateAttributeRule(rule.tag, rule.attribute, rule.value),
-      );
-    } else if (field === "conditions") {
-      newErrors.conditions = value.map((rule: Rule) => {
-        const ruleError = validateRule(rule);
-        if (ruleError) return ruleError;
-        return (
-          rule.conditions.map(validateCondition).filter(Boolean)[0] || null
-        );
-      });
-    } else if (field === "deleteTags") {
-      if (value.split(",").length > 1) {
-        newErrors.deleteTags = value.split(",").map(validateIgnoreTag);
-      }
-    }
-
-    setErrors((prevErrors) => ({ ...prevErrors, ...newErrors }));
   };
 
   return { errors, validateAndSetErrors };

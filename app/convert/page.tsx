@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 
 import type { ConversionSettings } from "./types/conversionSettings";
 import type { AttributeRule, TagConversion } from "./types/conversionTypes";
@@ -16,6 +18,9 @@ import ConvertedContent from "./components/lib/ConvertedContent";
 import CopyButton from "./components/lib/CopyButton";
 import DownloadButton from "./components/lib/DownloadButton";
 import OutputFormatSelector from "./components/OutputFormatSelector";
+import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { apiFetchClient } from "@/lib/apiFetchClient";
 
 const acceptedFileTypes = [
   "application/pdf",
@@ -28,8 +33,8 @@ const Convert = () => {
   const [file, setFile] = useState<File | null>(null);
   const { toast } = useToast();
 
+  const [deleteTags, setDeleteTags] = useState<string>(""); // Updated type
   const [ignoreTags, setIgnoreTags] = useState<string>("style,script");
-  const [deleteTags, setDeleteTags] = useState<string>("");
   const [tagConversions, setTagConversions] = useState<Array<TagConversion>>(
     [],
   );
@@ -42,6 +47,30 @@ const Convert = () => {
   const [outputFormat, setOutputFormat] = useState<"html" | "xml" | "htl">(
     "xml",
   );
+  const [autoCopy, setAutoCopy] = useState<boolean>(false);
+
+  const { data: userSettings } = useQuery({
+    queryKey: ['userSettings'],
+    queryFn: async () => {
+      const response = await apiFetchClient('/api/users/me');
+      return response.settings || {};
+    },
+  });
+
+  const updateSettingsMutation = useMutation({
+    mutationFn: async (newSettings: { [key: string]: any }) => {
+      await apiFetchClient('/api/users/settings', {
+        method: 'PUT',
+        body: JSON.stringify({ settings: newSettings }),
+      });
+    },
+  });
+
+  useEffect(() => {
+    if (userSettings && 'autoCopy' in userSettings) {
+      setAutoCopy(userSettings.autoCopy);
+    }
+  }, [userSettings]);
 
   const convertMutation = useMutation({
     mutationFn: async () => {
@@ -59,7 +88,7 @@ const Convert = () => {
       formData.append("options", JSON.stringify(options));
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/conversion/to-${outputFormat}`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/conversion/to-${outputFormat}`,
         {
           method: "POST",
           body: formData,
@@ -73,11 +102,18 @@ const Convert = () => {
       const text = await response.text();
       return text;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Conversion complete",
         description: `Your file has been successfully converted to ${outputFormat.toUpperCase()}.`,
       });
+      if (autoCopy) {
+        navigator.clipboard.writeText(data);
+        toast({
+          title: "Copied to clipboard",
+          description: "The converted content has been automatically copied to your clipboard.",
+        });
+      }
     },
     onError: (error) => {
       console.error("Conversion error:", error);
@@ -128,6 +164,34 @@ const Convert = () => {
     convertMutation.mutate();
   };
 
+  const handleAutoCopyChange = (checked: boolean) => {
+    setAutoCopy(checked);
+    updateSettingsMutation.mutate({ ...userSettings, autoCopy: checked });
+  };
+
+  const savePreset = (name: string, settings: ConversionSettings) => {
+    const updatedPresets = [...presets, { name, settings }];
+    setPresets(updatedPresets);
+    updateSettingsMutation.mutate({ ...userSettings, presets: updatedPresets });
+  };
+
+  const loadPreset = (name: string) => {
+    const preset = presets.find(p => p.name === name);
+    if (preset) {
+      setIgnoreTags(preset.settings.ignoreTags);
+      setDeleteTags(preset.settings.deleteTags);
+      setTagConversions(preset.settings.tagConversions);
+      setAttributeRules(preset.settings.attributeRules);
+    }
+  };
+
+  useEffect(() => {
+    if (userSettings && userSettings.presets) {
+      setPresets(userSettings.presets);
+    }
+  }, [userSettings]);
+  const [currentPreset, setCurrentPreset] = useState<string>("");
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/80 p-8">
       <div className="mx-auto max-w-7xl">
@@ -160,21 +224,33 @@ const Convert = () => {
               >
                 {convertMutation.isPending ? "Converting..." : "Convert File"}
               </Button>
+              <div className="flex items-center space-x-2">
+                <Switch
+                  id="auto-copy"
+                  checked={autoCopy}
+                  onCheckedChange={handleAutoCopyChange}
+                />
+                <Label htmlFor="auto-copy">Auto-copy result</Label>
+              </div>
             </CardContent>
           </Card>
 
-          <ConversionOptions
-            deleteTags={deleteTags}
-            setDeleteTags={setDeleteTags}
-            ignoreTags={ignoreTags}
-            setIgnoreTags={setIgnoreTags}
-            tagConversions={tagConversions}
-            setTagConversions={setTagConversions}
-            attributeRules={attributeRules}
-            setAttributeRules={setAttributeRules}
-            presets={presets}
-            setPresets={setPresets}
-          />
+         <ConversionOptions
+          deleteTags={deleteTags}
+          setDeleteTags={setDeleteTags}
+          ignoreTags={ignoreTags}
+          setIgnoreTags={setIgnoreTags}
+          tagConversions={tagConversions}
+          setTagConversions={setTagConversions}
+          attributeRules={attributeRules}
+          setAttributeRules={setAttributeRules}
+          presets={presets}
+          setPresets={setPresets}
+          savePreset={savePreset}
+          loadPreset={loadPreset}
+          currentPreset={currentPreset}
+          setCurrentPreset={setCurrentPreset}
+        />
         </div>
 
         {convertMutation.isSuccess && (

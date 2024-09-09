@@ -16,48 +16,46 @@ export interface ConversionOptionsProps {
 }
 
 export interface PresetsSectionProps {
+  presets: Array<{ name: string; settings: ConversionSettings }>;
+  setPresets: React.Dispatch<React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>>;
   currentPreset: string;
   setCurrentPreset: React.Dispatch<React.SetStateAction<string>>;
-  presets: Array<{ name: string; settings: ConversionSettings }>;
-  setPresets: React.Dispatch<
-    React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>
-  >;
   ignoreTags: string;
-  tagConversions: Array<TagConversion>;
-  attributeRules: Array<AttributeRule>;
+  tagConversions: TagConversion[];
+  attributeRules: AttributeRule[];
   deleteTags: string;
-  setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
-  setTagConversions: React.Dispatch<React.SetStateAction<Array<TagConversion>>>;
-  setAttributeRules: React.Dispatch<React.SetStateAction<Array<AttributeRule>>>;
-  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
+  setIgnoreTags: (ignoreTags: string) => void;
+  setTagConversions: (tagConversions: TagConversion[]) => void;
+  setAttributeRules: (attributeRules: AttributeRule[]) => void;
+  setDeleteTags: (deleteTags: string) => void;
 }
 
 export interface IgnoreTagsSectionProps {
   ignoreTags: string;
-  setIgnoreTags: React.Dispatch<React.SetStateAction<string>>;
-  errors: string[];
-  validateAndSetErrors: (field: string, value: any) => void;
+  setIgnoreTags: (ignoreTags: string) => void;
+  errors?: string;
+  validateAndSetErrors?: (field: string, value: any) => void;
 }
 
 export interface DeleteTagsSectionProps {
   deleteTags: string;
-  setDeleteTags: React.Dispatch<React.SetStateAction<string>>;
-  errors: string[];
-  validateAndSetErrors: (field: string, value: any) => void;
+  setDeleteTags: (deleteTags: string) => void;
+  errors?: string[;
+  validateAndSetErrors?: (field: string, value: any) => void;
 }
 
 export interface TagConversionsSectionProps {
-  tagConversions: Array<TagConversion>;
-  setTagConversions: React.Dispatch<React.SetStateAction<Array<TagConversion>>>;
-  errors: Array<string | null>;
-  validateAndSetErrors: (field: string, value: any) => void;
+  tagConversions: TagConversion[];
+  setTagConversions: (tagConversions: TagConversion[]) => void;  
+  errors?: { [key: number]: string };
+  validateAndSetErrors?: (field: string, value: any) => void;
 }
 
 export interface AttributeRulesSectionProps {
-  attributeRules: Array<AttributeRule>;
-  setAttributeRules: React.Dispatch<React.SetStateAction<Array<AttributeRule>>>;
-  errors: Array<string | null>;
-  validateAndSetErrors: (field: string, value: any) => void;
+  attributeRules: AttributeRule[];
+  setAttributeRules: (attributeRules: AttributeRule[]) => void;
+  errors?: { [key: number]: string };
+  validateAndSetErrors?: (field: string, value: any) => void;
 }
 
 export interface Condition {

@@ -19,7 +19,9 @@ const DeleteTagsSection = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newDeleteTags = e.target.value;
     setDeleteTags(newDeleteTags);
-    validateAndSetErrors("deleteTags", newDeleteTags);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("deleteTags", newDeleteTags);
+    }
   };
 
   return (

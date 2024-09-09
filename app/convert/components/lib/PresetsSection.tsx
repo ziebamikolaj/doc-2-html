@@ -12,6 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
+interface PresetsSection extends PresetsSectionProps {
+  savePreset: (name: string, settings: ConversionSettings) => void;
+  loadPreset: (name: string) => void;
+}
+
 const PresetsSection = ({
   presets,
   currentPreset,
@@ -25,8 +30,10 @@ const PresetsSection = ({
   setTagConversions,
   setAttributeRules,
   setDeleteTags,
-}: PresetsSectionProps) => {
-  const savePreset = () => {
+  savePreset,
+  loadPreset,
+}: PresetsSection) => {
+  const handleSavePreset = () => {
     if (currentPreset.trim() === "") return;
     const newPreset = {
       name: currentPreset,
@@ -37,18 +44,12 @@ const PresetsSection = ({
         deleteTags,
       } as ConversionSettings,
     };
-    setPresets([...presets, newPreset]);
+    savePreset(newPreset.name, newPreset.settings);
     setCurrentPreset("");
   };
 
-  const loadPreset = (name: string) => {
-    const preset = presets.find((p) => p.name === name);
-    if (preset) {
-      setIgnoreTags(preset.settings.ignoreTags);
-      setTagConversions(preset.settings.tagConversions);
-      setAttributeRules(preset.settings.attributeRules);
-      setDeleteTags(preset.settings.deleteTags);
-    }
+  const handleLoadPreset = (name: string) => {
+    loadPreset(name);
   };
 
   const exportSettings = () => {
@@ -105,7 +106,7 @@ const PresetsSection = ({
           placeholder="Preset name"
         />
         <div className="flex space-x-2">
-          <Button onClick={savePreset} variant="outline" className="flex-1">
+          <Button onClick={handleSavePreset} variant="outline" className="flex-1">
             Save Preset
           </Button>
           <Button onClick={exportSettings} variant="outline" className="flex-1">
@@ -120,7 +121,7 @@ const PresetsSection = ({
         {presets.map((preset, index) => (
           <Button
             key={index}
-            onClick={() => loadPreset(preset.name)}
+            onClick={() => handleLoadPreset(preset.name)}
             variant="outline"
           >
             {preset.name}

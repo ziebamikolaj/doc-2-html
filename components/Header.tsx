@@ -12,7 +12,7 @@ import { apiFetchClient } from "@/lib/apiFetchClient";
 import { userInfo } from "@/types/userInfo";
 
 const getUserInfo = async () => {
-  const res = await apiFetchClient("/users/me");
+  const res = await apiFetchClient("/api/users/me");
 
   const validateResponse = userInfo.safeParse(res);
 

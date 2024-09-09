@@ -1,5 +1,4 @@
-import type { ConversionOptionsProps } from "@/app/convert/types/conversionTypes";
-import React, { useState } from "react";
+import React from "react";
 
 import { useConversionErrors } from "@/app/convert/hooks/useConversionErrors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +9,28 @@ import IgnoreTagsSection from "./lib/IgnoreTagsSection";
 import PresetsSection from "./lib/PresetsSection";
 import TagConversionsSection from "./lib/TagConversionsSection";
 
-const ConversionOptions = ({
+import type { ConversionSettings } from "@/app/convert/types/conversionSettings";
+import type { TagConversion } from "@/app/convert/types/conversionTypes";
+import type { AttributeRule } from "@/app/convert/types/conversionTypes";
+
+interface ConversionOptionsProps {
+  deleteTags: string;
+  setDeleteTags: (deleteTags: string) => void;
+  ignoreTags: string;
+  setIgnoreTags: (ignoreTags: string) => void;
+  tagConversions: TagConversion[];
+  setTagConversions: (tagConversions: TagConversion[]) => void;
+  attributeRules: AttributeRule[];
+  setAttributeRules: (attributeRules: AttributeRule[]) => void;
+  presets: Array<{ name: string; settings: ConversionSettings }>;
+  setPresets: React.Dispatch<React.SetStateAction<Array<{ name: string; settings: ConversionSettings }>>>;
+  savePreset: (name: string, settings: ConversionSettings) => void;
+  loadPreset: (name: string) => void;
+  currentPreset: string;
+  setCurrentPreset: React.Dispatch<React.SetStateAction<string>>;
+}
+
+const ConversionOptions: React.FC<ConversionOptionsProps> = ({
   deleteTags,
   setDeleteTags,
   ignoreTags,
@@ -21,31 +41,31 @@ const ConversionOptions = ({
   setAttributeRules,
   presets,
   setPresets,
-}: ConversionOptionsProps) => {
-  const [currentPreset, setCurrentPreset] = useState("");
+  savePreset,
+  loadPreset,
+  currentPreset,
+  setCurrentPreset,
+}) => {
   const { errors, validateAndSetErrors } = useConversionErrors();
 
   return (
     <Card className="shadow-xl transition-all duration-300 hover:shadow-2xl">
-      <CardHeader className="bg-primary text-primary-foreground">
-        <CardTitle className="text-center text-2xl font-bold">
-          Conversion Options
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="max-h-[calc(100vh-20rem)] space-y-6 overflow-y-auto p-6">
+      <CardContent className="space-y-6 p-6">
         <PresetsSection
-          deleteTags={deleteTags}
-          setDeleteTags={setDeleteTags}
-          currentPreset={currentPreset}
-          setCurrentPreset={setCurrentPreset}
           presets={presets}
           setPresets={setPresets}
           ignoreTags={ignoreTags}
           tagConversions={tagConversions}
           attributeRules={attributeRules}
+          deleteTags={deleteTags}
           setIgnoreTags={setIgnoreTags}
           setTagConversions={setTagConversions}
           setAttributeRules={setAttributeRules}
+          setDeleteTags={setDeleteTags}
+          savePreset={savePreset}
+          loadPreset={loadPreset}
+          currentPreset={currentPreset}
+          setCurrentPreset={setCurrentPreset}
         />
         <IgnoreTagsSection
           ignoreTags={ignoreTags}

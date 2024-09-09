@@ -26,18 +26,22 @@ const formSchema = z.object({
 });
 
 const login = async (data: z.infer<typeof formSchema>) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign-in`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-in`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
     },
-    body: JSON.stringify(data),
-  });
+  );
   if (!res.ok) {
     const errorData = await res.json();
     throw new Error(errorData.message || "Failed to login");
   }
   const token = (await res.json()) as AccessToken;
+  console.log(token.accessToken);
   Cookies.set("Authorization", "Bearer " + token.accessToken);
   return token;
 };

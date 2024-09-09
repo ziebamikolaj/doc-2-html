@@ -47,14 +47,18 @@ const AttributeRulesSection = ({
       },
     ];
     setAttributeRules(newAttributeRules);
-    validateAndSetErrors("attributeRules", newAttributeRules);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("attributeRules", newAttributeRules);
+    }
     setExpandedRules([newIndex]);
   };
 
   const removeAttributeRule = (index: number) => {
     const newAttributeRules = attributeRules.filter((_, i) => i !== index);
     setAttributeRules(newAttributeRules);
-    validateAndSetErrors("attributeRules", newAttributeRules);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("attributeRules", newAttributeRules);
+    }
     setExpandedRules(expandedRules.filter((i) => i !== index));
   };
 
@@ -67,7 +71,9 @@ const AttributeRulesSection = ({
       i === index ? { ...rule, [field]: value } : rule,
     );
     setAttributeRules(newAttributeRules);
-    validateAndSetErrors("attributeRules", newAttributeRules);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("attributeRules", newAttributeRules);
+    }
   };
 
   const toggleRule = (index: number) => {
@@ -95,6 +101,7 @@ const AttributeRulesSection = ({
     items.splice(result.destination.index, 0, reorderedItem as AttributeRule);
 
     setAttributeRules(items);
+    
     validateAndSetErrors("attributeRules", items);
   };
 
@@ -207,7 +214,7 @@ const AttributeRulesSection = ({
                               updateAttributeRule(index, "rule", newRule)
                             }
                           />
-                          {errors[index] && (
+                          {errors && errors[index] && (
                             <p className="text-sm text-red-500">
                               {errors[index]}
                             </p>

@@ -19,7 +19,9 @@ const IgnoreTagsSection = ({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newIgnoreTags = e.target.value;
     setIgnoreTags(newIgnoreTags);
-    validateAndSetErrors("ignoreTags", newIgnoreTags);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("ignoreTags", newIgnoreTags);
+    }
   };
 
   return (

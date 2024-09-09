@@ -7,7 +7,7 @@ const HOME = "/";
 
 const checkIsLogged = async () => {
   try {
-    const res = await apiFetchServer("/users/me");
+    const res = await apiFetchServer("/api/users/me");
     return res.ok;
   } catch (error) {
     return false;

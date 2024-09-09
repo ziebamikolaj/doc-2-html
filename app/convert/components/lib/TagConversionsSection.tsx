@@ -47,14 +47,18 @@ const TagConversionsSection = ({
       } as TagConversion,
     ];
     setTagConversions(newTagConversions);
-    validateAndSetErrors("tagConversions", newTagConversions);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("tagConversions", newTagConversions);
+    }
     setExpandedConversions([newIndex]);
   };
 
   const removeTagConversion = (index: number) => {
     const newTagConversions = tagConversions.filter((_, i) => i !== index);
     setTagConversions(newTagConversions);
-    validateAndSetErrors("tagConversions", newTagConversions);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("tagConversions", newTagConversions);
+    }
     setExpandedConversions(expandedConversions.filter((i) => i !== index));
   };
 
@@ -66,8 +70,10 @@ const TagConversionsSection = ({
     const newTagConversions = tagConversions.map((conversion, i) =>
       i === index ? { ...conversion, [field]: value } : conversion,
     );
-    setTagConversions(newTagConversions);
-    validateAndSetErrors("tagConversions", newTagConversions);
+    setTagConversions(newTagConversions); 
+    if (validateAndSetErrors) {
+      validateAndSetErrors("tagConversions", newTagConversions);
+    }
   };
 
   const toggleConversion = (index: number) => {
@@ -95,7 +101,9 @@ const TagConversionsSection = ({
     items.splice(result.destination.index, 0, reorderedItem as TagConversion);
 
     setTagConversions(items);
-    validateAndSetErrors("tagConversions", items);
+    if (validateAndSetErrors) {
+      validateAndSetErrors("tagConversions", items);
+    }
   };
 
   return (
@@ -198,7 +206,7 @@ const TagConversionsSection = ({
                               updateTagConversion(index, "rule", newRule);
                             }}
                           />
-                          {errors[index] && (
+                          {errors && errors[index] && (
                             <p className="text-sm text-red-500">
                               {errors[index]}
                             </p>

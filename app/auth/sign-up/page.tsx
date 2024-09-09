@@ -35,14 +35,17 @@ const formSchema = z
   });
 
 const signUp = async (data: z.infer<typeof formSchema>) => {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/sign-up`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/auth/sign-up`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify(data),
     },
-    credentials: "include",
-    body: JSON.stringify(data),
-  });
+  );
   if (!res.ok) {
     const errorData = await res.json();
     throw new Error(errorData.message || "Failed to sign up");
